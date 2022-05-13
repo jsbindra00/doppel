@@ -111,9 +111,6 @@ class InputExecutor:
         print(self.t_start)
         self.active = True
 
-
-
-
         queue_processor = Thread(target=self.processQueue)
         queue_processor.start()
 
@@ -124,5 +121,3 @@ class InputExecutor:
                 self.processingQueue.put(self.__renderEvent(line))
         queue_processor.join()
 
-
-# 

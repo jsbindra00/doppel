@@ -1,16 +1,28 @@
+call_sign = '''
+ ███╗░░██╗░░███╗░░░██████╗░██╗░░██╗████████╗██████╗░██╗██████╗░██████╗░██████╗░
+ ████╗░██║░████║░░██╔════╝░██║░░██║╚══██╔══╝██╔══██╗██║██╔══██╗╚════██╗██╔══██╗
+ ██╔██╗██║██╔██║░░██║░░██╗░███████║░░░██║░░░██████╔╝██║██║░░██║░█████╔╝██████╔╝
+ ██║╚████║╚═╝██║░░██║░░╚██╗██╔══██║░░░██║░░░██╔══██╗██║██║░░██║░╚═══██╗██╔══██╗
+ ██║░╚███║███████╗╚██████╔╝██║░░██║░░░██║░░░██║░░██║██║██████╔╝██████╔╝██║░░██║
+ ╚═╝░░╚══╝╚══════╝░╚═════╝░╚═╝░░╚═╝░░░╚═╝░░░╚═╝░░╚═╝╚═╝╚═════╝░╚═════╝░╚═╝░░╚═╝
+'''
+
+WINDOW_DIMENSIONS = (1600,900)
+
 
 
 
 
 from tkinter.filedialog import askopenfilename, asksaveasfilename
+from tkinter.tix import WINDOW
+
+from sympy import Q
 
 from InputExecutor import InputExecutor
 from InputTracker import InputTracker
 from documentutil import writeFile
 
 from docutil import DocUtil
-
-import os
 import sys
 import glfw
 import OpenGL.GL as gl
@@ -18,20 +30,9 @@ import imgui
 from imgui.integrations.glfw import GlfwRenderer
 import tkinter as tk
 tk.Tk().withdraw()
-
-
-
              
 path_to_font = None  # "path/to/font.ttf"
-
 opened_state = True                                           
-
-      
-
-
-
-
-
 
 class Application:
     def __init__(self):
@@ -44,13 +45,14 @@ class Application:
         self.active_gui_elements = {
         "begin_tracking_button" : True,
         "begin_executing_button": True,
-        "file_viewer" : True
+        "file_viewer" : True,
+        "navigation_pane": True
 
         }
 
 
     def BrowseFiles(self):
-        file_name = tk.filedialog.askopenfilename(initialdir = "/",
+        file_name = tk.filedialog.askopenfilename(initialdir = r"D:\FILES\Desktop\other\doppel",
                                             title = "Select a File",
                                             filetypes = (("Text files",
                                                             "*.txt*"),
@@ -65,10 +67,11 @@ class Application:
         self.executor_.execute("./trackingres.txt", print_events=True)
 
 
-
     def impl_glfw_init(self):
+
+
         width, height = 1600, 900
-        window_name = "minimal ImGui/GLFW3 example"
+        window_name = "doppel"
 
         if not glfw.init():
             print("Could not initialize OpenGL context")
@@ -89,8 +92,6 @@ class Application:
 
         return window
 
-
-
     def frame_commands(self):
         gl.glClearColor(0.1, 0.1, 0.1, 1)
         gl.glClear(gl.GL_COLOR_BUFFER_BIT)
@@ -101,9 +102,18 @@ class Application:
             sys.exit(0)
 
 
-    # TOP NAVIGATION BAR
+        imgui.begin("main_window")
+        
+        global WINDOW_DIMENSIONS
+        print(WINDOW_DIMENSIONS)
+
         if imgui.begin_main_menu_bar():
+            
+            global nav_bar_size
+            nav_bar_size = imgui.get_window_size()
+
             if imgui.begin_menu("File", enabled=True):
+
                 clicked_open, selected_open = imgui.menu_item("Open Tracking File", "Ctrl+O", selected=False, enabled=True)
                 if clicked_open:
                     file_name = self.BrowseFiles()
@@ -114,42 +124,33 @@ class Application:
                 if clicked_quit:
                     sys.exit(0)
                 imgui.end_menu()
-            imgui.end_main_menu_bar()
-        imgui.begin("Example: item groups")
-        imgui.begin_group()
 
+
+            imgui.end_main_menu_bar()
+
+    
+    
 
         if self.active_gui_elements["file_viewer"]:
-            imgui.begin("Active Tracking File")
-            imgui.text_unformatted(self.tracking_file_contents)
-            imgui.end()
-        # visual-example::
-        # :auto_layout:
-        # :height: 80
-        # :width: 300
-        # imgui.begin("Example: text with label")
-        # imgui.label_text("my label", "my text")
-        # imgui.end()
-        #     imgui.label_text("foo", "bar" * 20)
-        #     imgui.begin("Example: item groups")
-        #     imgui.begin_group()
-        #     imgui.text("First group (buttons):")
-        #     imgui.button("Button A")
-        #     imgui.button("Button B")
-        #     imgui.end_group()
-        #     imgui.new_line()
+
             
-        #     imgui.begin_group()
-        #     imgui.text("Second group (text and bullet texts):")
-        #     imgui.bullet_text("Bullet A")
-        #     imgui.bullet_text("Bullet B")
-        #     imgui.end_group()
-        #     imgui.end()
+            file_view_flags = imgui.WINDOW_NO_MOVE | imgui.WINDOW_ALWAYS_VERTICAL_SCROLLBAR | imgui.WINDOW_NO_RESIZE | imgui.WINDOW_ALWAYS_HORIZONTAL_SCROLLBAR| imgui.WINDOW_NO_COLLAPSE
+            imgui.set_next_window_position(0,nav_bar_size[1])
+            imgui.begin("Active Tracking File", flags=file_view_flags)
+            imgui.text_unformatted(self.tracking_file_contents)
+            global file_viewer_size
+            file_viewer_size = imgui.get_window_size()
+            
+            global file_viewer_position
+            file_viewer_position = imgui.get_window_position()
+            imgui.end()
 
+        if self.active_gui_elements["navigation_pane"]:
 
-
-        if self.active_gui_elements["begin_tracking_button"]:
-            # imgui.begin("Example: tooltip")
+            NAVIGATION_PANE_WINDOW_FLAGS = imgui.WINDOW_NO_MOVE | imgui.WINDOW_NO_RESIZE | imgui.WINDOW_NO_COLLAPSE
+            imgui.set_next_window_position(file_viewer_position[0] + file_viewer_size[0], nav_bar_size[1])
+            imgui.set_next_window_size(WINDOW_DIMENSIONS[0] - file_viewer_size[0], WINDOW_DIMENSIONS[1] - nav_bar_size[1])
+            imgui.begin("Navigation Pane", flags=NAVIGATION_PANE_WINDOW_FLAGS)
             tracking = imgui.button("Begin Tracking")
             if imgui.is_item_hovered():
                 imgui.begin_tooltip()
@@ -157,9 +158,7 @@ class Application:
                 imgui.end_tooltip()
             if tracking:
                 self.StartTracking()
-            # imgui.end()
 
-        if self.active_gui_elements["begin_executing_button"]:
             executing = imgui.button("Begin Executing")
             if imgui.is_item_hovered():
                 imgui.begin_tooltip()
@@ -168,10 +167,9 @@ class Application:
             if executing:
                 
                 self.Execute()
+            imgui.end()
 
-        imgui.end_group()
         imgui.end()
-
 
 
     def render_frame(self,impl, window, font):
@@ -208,86 +206,6 @@ class Application:
         impl.shutdown()
         glfw.terminate()
 
-
-        pass
-        
-
-
-
-
-
-
-
-
-
-    # if active["popup"]:
-    #     imgui.begin("Example: simple popup")
-    #     if imgui.button("select"):
-    #         imgui.open_popup("select-popup")
-    #     imgui.same_line()
-    #     if imgui.begin_popup("select-popup"):
-    #         imgui.text("Select one")
-    #         imgui.separator()
-    #         imgui.selectable("One")
-    #         imgui.selectable("Two")
-    #         imgui.selectable("Three")
-    #         imgui.end_popup()
-    #     imgui.end()
-
-    # if active["popup modal"]:
-    #     imgui.begin("Example: simple popup modal")
-    #     if imgui.button("Open Modal popup"):
-    #         imgui.open_popup("select-popup-modal")
-    #     imgui.same_line()
-    #     if imgui.begin_popup_modal("select-popup-modal")[0]:
-    #         imgui.text("Select an option:")
-    #         imgui.separator()
-    #         imgui.selectable("One")
-    #         imgui.selectable("Two")
-    #         imgui.selectable("Three")
-    #         imgui.end_popup()
-    #     imgui.end()
-
-    # if active["popup context window"]:
-    #     imgui.begin("Example: popup context window")
-    #     if imgui.begin_popup_context_window():
-    #         imgui.selectable("Clear")
-    #         imgui.end_popup()
-    #     imgui.end()
-
-    # if active["popup context void"]:
-    #     if imgui.begin_popup_context_void():
-    #         imgui.selectable("Clear")
-    #         imgui.end_popup()
-
-
-    # if active["group"]:
-
-
-
-  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 if __name__ == "__main__":
     app = Application()
     app.Start()
-
-
