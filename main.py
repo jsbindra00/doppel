@@ -1,10 +1,15 @@
 call_sign = '''
+
+
  ███╗░░██╗░░███╗░░░██████╗░██╗░░██╗████████╗██████╗░██╗██████╗░██████╗░██████╗░
  ████╗░██║░████║░░██╔════╝░██║░░██║╚══██╔══╝██╔══██╗██║██╔══██╗╚════██╗██╔══██╗
  ██╔██╗██║██╔██║░░██║░░██╗░███████║░░░██║░░░██████╔╝██║██║░░██║░█████╔╝██████╔╝
  ██║╚████║╚═╝██║░░██║░░╚██╗██╔══██║░░░██║░░░██╔══██╗██║██║░░██║░╚═══██╗██╔══██╗
  ██║░╚███║███████╗╚██████╔╝██║░░██║░░░██║░░░██║░░██║██║██████╔╝██████╔╝██║░░██║
  ╚═╝░░╚══╝╚══════╝░╚═════╝░╚═╝░░╚═╝░░░╚═╝░░░╚═╝░░╚═╝╚═╝╚═════╝░╚═════╝░╚═╝░░╚═╝
+
+
+
 '''
 
 WINDOW_DIMENSIONS = (1600,900)
@@ -29,6 +34,9 @@ import OpenGL.GL as gl
 import imgui
 from imgui.integrations.glfw import GlfwRenderer
 import tkinter as tk
+
+
+from matplotlib import image
 tk.Tk().withdraw()
              
 path_to_font = None  # "path/to/font.ttf"
@@ -50,6 +58,10 @@ class Application:
 
         }
 
+
+
+    def LoadImage(self, dir):
+        return image.imread(dir)
 
     def BrowseFiles(self):
         file_name = tk.filedialog.askopenfilename(initialdir = r"D:\FILES\Desktop\other\doppel",
@@ -151,6 +163,11 @@ class Application:
             imgui.set_next_window_position(file_viewer_position[0] + file_viewer_size[0], nav_bar_size[1])
             imgui.set_next_window_size(WINDOW_DIMENSIONS[0] - file_viewer_size[0], WINDOW_DIMENSIONS[1] - nav_bar_size[1])
             imgui.begin("Navigation Pane", flags=NAVIGATION_PANE_WINDOW_FLAGS)
+
+            
+            self.LoadImage(r"D:\FILES\Desktop\other\doppel\n1ghtrid3r.png")
+
+
             tracking = imgui.button("Begin Tracking")
             if imgui.is_item_hovered():
                 imgui.begin_tooltip()
