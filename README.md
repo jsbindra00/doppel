@@ -16,8 +16,5 @@ A small, easy to use and extremely useful /tool that you can use to automate pre
   <li class="to_do_elt">
     Add support for loops, conditionals.
   </li>
-  <li class="to_do_elt">
-    Make panes immovable, clear struct in layout design.
-  </li>
-  
+
  </ul>
